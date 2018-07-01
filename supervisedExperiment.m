@@ -90,7 +90,7 @@ report.testTimeStd=std(test_t);
 
 %% 计算precision-recall
 %对比算法
-cmp_path='E:\物体检测与识别\论文工作\显著性检测\多特征概率融合的显著性检测算法\实验结果\cmp_curve.mat';
+cmp_path='cmp_curve.mat';
 if exist(cmp_path,'file')
     load(cmp_path,'-mat');
 else
