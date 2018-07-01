@@ -2,15 +2,15 @@
 % 基于频域方差融合
 
 %% 读取图像
-im_path=cell(6,1);
+im_path=cell(6,1);      %path of original images
 im_path{1}='saliencymaps\AC\';
 im_path{2}='saliencymaps\GB\';
 im_path{3}='saliencymaps\IG\';
 im_path{4}='saliencymaps\IT\';
 im_path{5}='saliencymaps\MZ\';
 im_path{6}='saliencymaps\SR\';
-gt_path='binarymasks\';
-save_path='启发式\';
+gt_path='binarymasks';
+save_path='result\heuristic\';  %result
 multi_ft=cell(6,1);
 %% 导入图片文件
 im_name=imagePathRead(im_path{1});
@@ -22,24 +22,24 @@ im_n=length(im_name);
 x=[1:m];
 y=[1:n]';
 %AC方差
-kernel_y=0.6-0.8*exp(-y/40)+0.4*exp(-y/10);
-kernel_x=0.6-0.8*exp(-x/40)+0.4*exp(-x/10);
+kernel_y=0.5-0.7*exp(-y/40)+0.4*exp(-y/10);
+kernel_x=0.5-0.7*exp(-x/40)+0.4*exp(-x/10);
 multi_ft{1}.var=kernel_y*kernel_x;
 %GB方差
 kernel_y=1.1-exp(-[y-25].^2/(2*30^2));
 kernel_x=1.1-exp(-[x-25].^2/(2*30^2));
 multi_ft{2}.var=kernel_y*kernel_x;
 %IG方差
-kernel_y=0.5-0.5*exp(-y/80);
-kernel_x=0.5-0.5*exp(-x/80);
+kernel_y=0.4-0.4*exp(-y/60)+0.2*exp(-y);
+kernel_x=0.4-0.4*exp(-x/60)+0.2*exp(-x);
 multi_ft{3}.var=kernel_y*kernel_x;
 %IT方差
 kernel_y=1.5-1.3*exp(-[y-30].^2/(2*10^2));
 kernel_x=1.5-1.3*exp(-[x-30].^2/(2*10^2));
 multi_ft{4}.var=kernel_y*kernel_x;
 %MZ方差
-kernel_y=1.15-exp(-[y-50].^2/(2*20^2));
-kernel_x=1.15-exp(-[x-50].^2/(2*20^2));
+kernel_y=1-0.82*exp(-[y-50].^2/(2*20^2));
+kernel_x=1-0.82*exp(-[x-50].^2/(2*20^2));
 multi_ft{5}.var=kernel_y*kernel_x;
 %SR方差
 kernel_y=1.2*exp(-y/40)+0.05;
@@ -47,6 +47,7 @@ kernel_x=1.2*exp(-x/40)+0.05;
 multi_ft{6}.var=kernel_y*kernel_x;
 
 %% 融合显著性并计算各个图像显著图
+disp('启发式融合算法');
 precision=zeros(100,1);
 recall=zeros(100,1);
 levels=[1:100]*2.56;    %阈值变化
@@ -66,15 +67,11 @@ end
 
 %% 计算precision-recall
 %对比算法
-cmp_path='cmp_curve.mat';
-if exist(cmp_path,'file')
-    load(cmp_path,'-mat');
-else
-    cmp_curve=cell(6,1);
-    for i=1:6
-        cmp_curve{i}=PrecisionRecall(im_path{i},gt_path);
-    end
-    save('cmp_curve.mat',cmp_curve);
+disp('PR曲线');
+cmp_curve=cell(6,1);
+for i=1:6
+    disp(['对比算法PR曲线',num2str(i)]);
+    cmp_curve{i}=PrecisionRecall(im_path{i},gt_path);
 end
 
 %融合结果
@@ -92,3 +89,23 @@ end
 grid on;
 xlabel('Recall');
 ylabel('Precision');
+
+legend('h-MF','AC','GB','IG','IT','MZ','SR');
+
+%%  统计结果
+%准确率
+for i=1:6
+    result_table(1,i)=cmp_curve{i}.averP;
+end
+result_table(1,7)=re_curve.averP;
+
+%召回率
+for i=1:6
+    result_table(2,i)=cmp_curve{i}.averR;
+end
+result_table(2,7)=re_curve.averR;
+
+%F-measure
+for i=1:7
+    result_table(3,i)=2*result_table(1,i)*result_table(2,i)/(result_table(1,i)+result_table(2,i));
+end

@@ -10,9 +10,9 @@ salient_name=imagePathRead(salient_path);
 gt_name=imagePathRead(gt_path);
 im_n=length(salient_name);
 
-precision=zeros(im_n,100);  %保存每幅图像的 precision-recall
-recall=zeros(im_n,100);
-levels=[1:100]*2.56;    %阈值变化
+precision=zeros(50,1);  %保存每幅图像的 precision-recall
+recall=zeros(50,1);
+levels=[0:0.02:0.98];    %阈值变化
 
 % 1.计算每幅图像的 precision recall
 for i=1:im_n
@@ -25,19 +25,25 @@ for i=1:im_n
     % 读取salient map
     salient_mp=imread(fullfile(salient_path,salient_name{i}));
     salient_mp=salient_mp(:,:,1);
+    salient_mp=double(salient_mp)/double(max(salient_mp(:)));  %归一化
     
     % 计算precision-recall
-    for k=1:100
-        cur_sl=salient_mp>levels(k);    %阈值分割后的前景
+    for k=1:50
+        cur_sl=salient_mp>=levels(k);    %阈值分割后的前景
         right=cur_sl.*gt;   %正确的区域
-        right_cover=sum(right(:));
-        precision(i,k)=right_cover/sum(cur_sl(:));
-        cur_recall=right_cover/gt_cover;
-        recall(i,k)=cur_recall;
         
-        if cur_recall==0    %召回率等于0，阈值过高，无意义
-            break;
+        sl_cover=sum(cur_sl(:));
+        right_cover=sum(right(:));
+        if sl_cover==0
+            cur_precision=1;
+        else
+            cur_precision=right_cover/sl_cover;
         end
+        
+        cur_recall=right_cover/gt_cover;
+        
+        precision(k)=precision(k)+cur_precision;
+        recall(k)=recall(k)+cur_recall;
     end
     
     if mod(i,10)==0
@@ -46,19 +52,8 @@ for i=1:im_n
 end
 
 % 2.融合平均 precision recall
-curve.precision=zeros(20,1);
-precision_num=zeros(20,1);
-curve.recall=[0.05:0.05:1];
-
-for i=1:im_n
-    for k=1:100
-        re=ceil(recall(i,k)*20);   %召回率对应的坐标
-        if re==0
-            continue;
-        end
-        curve.precision(re)=curve.precision(re)+precision(i,k);
-        precision_num(re)=precision_num(re)+1;
-    end
-end
-curve.precision=curve.precision./precision_num;
+curve.precision=precision/im_n;
+curve.recall=recall/im_n;
+curve.averP=sum(curve.precision.*(curve.recall-[curve.recall(2:50);0]));
+curve.averR=curve.averP/max(curve.precision);
 end

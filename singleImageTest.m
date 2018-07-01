@@ -10,7 +10,7 @@ im_path{3}='saliencymaps\IG\';
 im_path{4}='saliencymaps\IT\';
 im_path{5}='saliencymaps\MZ\';
 im_path{6}='saliencymaps\SR\';
-gt_path='binarymasks\';
+gt_path='binarymasks';
 
 multi_ft=cell(6,1);
 for i=1:6
