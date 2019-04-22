@@ -1,93 +1,60 @@
-%% 单一图像多特征融合显著性检测测试
+%% Single image test
 % 基于频域方差融合
 
-%% 读取图像
-im_name='0_11_11313.jpg';gt_name='0_11_11313.bmp';
-im_path=cell(6,1);
-im_path{1}='saliencymaps\AC\';
-im_path{2}='saliencymaps\GB\';
-im_path{3}='saliencymaps\IG\';
-im_path{4}='saliencymaps\IT\';
-im_path{5}='saliencymaps\MZ\';
-im_path{6}='saliencymaps\SR\';
-gt_path='binarymasks';
+%% load the path of image
+feature_path=cell(3,1);
+feature_path{1}='result_CHS\';
+feature_path{2}='result_RC\';
+feature_path{3}='result_DRFI\';
+gt_path='ground_truth_mask\';
+save_path='our_result_MF\heuristic\';  %result
 
-multi_ft=cell(6,1);
-for i=1:6
-    multi_ft{i}.image=imread(fullfile(im_path{i},im_name));
+multi_ft=cell(3,1);
+im_name=cell(3,1);
+for i=1:3
+    im_name{i}=imagePathRead(feature_path{i});
+end
+im_n=length(im_name{1});
+
+%% setting params
+gn=100;gm=100;
+rh=0.05;
+gk=gaussianFilterFq(rh,gn,gm);%表示紧凑性的高斯滤波核
+
+% prior params
+priorPara.deltar=50;
+priorPara.alphac=0.012;
+priorPara.gk=gk;
+
+% fusion params
+x=0:99;
+x(100:-1:51)=1:50;
+
+ft_params=cell(3,1);
+
+%CHS
+ft_params{1}.weight=0.35*ones(gn,gm);
+wx=exp(-x.^2/4000);
+ft_params{1}.convk=wx'*wx;
+
+%RC
+ft_params{2}.weight=0.2*ones(gn,gm);
+wx=exp(-x.^2/400);
+ft_params{2}.convk=wx'*wx;
+
+%DRFI
+ft_params{3}.weight=0.45*ones(gn,gm);
+wx=exp(-x.^2/5000);
+ft_params{3}.convk=wx'*wx;
+
+%% feature fusion
+%read the feature map
+im_id=26;
+for j=1:3
+    multi_ft{j}=imread(fullfile(feature_path{j},im_name{j}{im_id}));
 end
 
-%% 设置参数
-[n,m,~]=size(multi_ft{1}.image);
-x=[1:m];
-y=[1:n]';
-%AC方差
-kernel_y=0.6-0.8*exp(-y/40)+0.4*exp(-y/10);
-kernel_x=0.6-0.8*exp(-x/40)+0.4*exp(-x/10);
-multi_ft{1}.var=kernel_y*kernel_x;
-%GB方差
-kernel_y=1.1-exp(-[y-25].^2/(2*30^2));
-kernel_x=1.1-exp(-[x-25].^2/(2*30^2));
-multi_ft{2}.var=kernel_y*kernel_x;
-%IG方差
-kernel_y=0.55-0.5*exp(-y/80);
-kernel_x=0.55-0.5*exp(-x/80);
-multi_ft{3}.var=kernel_y*kernel_x;
-%IT方差
-kernel_y=1.5-1.3*exp(-[y-30].^2/(2*10^2));
-kernel_x=1.5-1.3*exp(-[x-30].^2/(2*10^2));
-multi_ft{4}.var=kernel_y*kernel_x;
-%MZ方差
-kernel_y=1.15-exp(-[y-50].^2/(2*20^2));
-kernel_x=1.15-exp(-[x-50].^2/(2*20^2));
-multi_ft{5}.var=kernel_y*kernel_x;
-%SR方差
-kernel_y=1.2*exp(-y/40)+0.05;
-kernel_x=1.2*exp(-x/40)+0.05;
-multi_ft{6}.var=kernel_y*kernel_x;
-
-%% 融合显著性
-salient_mp=multiFeatureSalientDetection(multi_ft);
-figure(1);imshow(salient_mp/256);
-figure(2);imshow(salient_mp/256>0.4);
-
-%% 计算precision-recall
-% 读取ground truth
-gt=imread(fullfile(gt_path,gt_name));
-gt=gt(:,:,1);
-gt=gt>0;    %二值化
-gt_cover=sum(gt(:));    %gt面积
-
-% 读取图像
-img=cell(7,1);
-for i=1:6
-    img{i}=multi_ft{i}.image(:,:,1);
-end
-img{7}=salient_mp;
-
-% 计算precision-recall
-precision=zeros(7,100);
-recall=zeros(7,100);
-levels=[1:100]*2.56;    %阈值变化
-for i=1:7
-    for k=1:100
-        cur_sl=img{i}>levels(k);    %阈值分割后的前景
-        right=cur_sl.*gt;   %正确的区域
-        right_cover=sum(right(:));
-        precision(i,k)=right_cover/sum(cur_sl(:));
-        recall(i,k)=right_cover/gt_cover;
-    end
-end
-
-%%  绘图
-figure(4);
-hold off;
-for i=1:6
-    if i==2
-        hold on;
-    end
-    colr=[max(i/4-0.5,0),max(1-abs(i-3.5)/4,0),max(1.1-i/4,0)];
-    plot(recall(i,:),precision(i,:),'color',colr);
-end
-
-plot(recall(7,:),precision(7,:),'k');
+% fusion
+salient_mp=multiFeatureSlDec( multi_ft, ft_params, priorPara );
+figure;imshow(salient_mp);title('fusion result');
+figure;imshow([multi_ft{1},multi_ft{2},multi_ft{3}]);title('feature maps');

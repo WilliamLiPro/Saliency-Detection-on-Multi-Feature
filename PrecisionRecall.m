@@ -10,9 +10,9 @@ salient_name=imagePathRead(salient_path);
 gt_name=imagePathRead(gt_path);
 im_n=length(salient_name);
 
-precision=zeros(50,1);  %保存每幅图像的 precision-recall
-recall=zeros(50,1);
-levels=[0:0.02:0.98];    %阈值变化
+precision=zeros(51,1);  %保存每幅图像的 precision-recall
+recall=zeros(51,1);
+levels=[0:0.02:1];    %阈值变化
 
 % 1.计算每幅图像的 precision recall
 for i=1:im_n
@@ -27,8 +27,14 @@ for i=1:im_n
     salient_mp=salient_mp(:,:,1);
     salient_mp=double(salient_mp)/double(max(salient_mp(:)));  %归一化
     
+    [ng,mg]=size(gt);
+    [ns,ms]=size(salient_mp);
+    if ng~=ns||mg~=ms
+        salient_mp=imresize(salient_mp,[ng,mg]);
+    end
+    
     % 计算precision-recall
-    for k=1:50
+    for k=1:51
         cur_sl=salient_mp>=levels(k);    %阈值分割后的前景
         right=cur_sl.*gt;   %正确的区域
         
@@ -54,6 +60,6 @@ end
 % 2.融合平均 precision recall
 curve.precision=precision/im_n;
 curve.recall=recall/im_n;
-curve.averP=sum(curve.precision.*(curve.recall-[curve.recall(2:50);0]));
-curve.averR=curve.averP/max(curve.precision);
+
+curve=Mean_PR(curve);
 end
