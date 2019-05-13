@@ -1,14 +1,2 @@
 # Saliency-Detection-on-Multi-feature-
-This is a program of Saliency Detection based on multi-feature distribution and maximum likelihood estiation.
-The experimental data have been compressed, please uncompress the .zip files first. 
-The file saliencymaps.zip is too big to upload, please download from:
-http://ivrlwww.epfl.ch/supplementary_material/RK_CVPR09/saliencymaps.zip
-
-Then decompress the file to this program directly.
-For some user without Chinese package, some unknown signs may occure, please delete those unknown signs before running the program.
-
--------------------------------------------------------------------------------------------------
-If this program helped you in your paper or other work, please indicate the reference:
-
-"Visual Saliency Detection with Multi-features in Probability Framework"
-
+In order to improve the precision of visual saliency detection with multi-features, a multi-feature integration algorithm is proposed based on the joint probability distribution of saliency map and combined with priori knowledge. Firstly, the potential defects of single feature saliency detection are analyzed, and the joint probability distribution of saliency maps with multiple features is deduced. Secondly, the priori distribution of the saliency map is deduced based on the rarity, sparsity, compactness and center priori of the saliency map, and the condition distribution of the saliency map is simplified based on the assumption of normal distribution. Then the maximum a posteriori estimation is obtained from the joint probability distribution of the saliency map, and a supervised learning model of the distribution parameters is constructed based on the multi-threshold hypothesis. Experiments show that compared to the highest-precision saliency detection method on single feature, the mean average error of the multi-feature algorithm under the supervised and heuristic method is decreased by 6.98% and 6.81%, and the average F-measure is improved by 1.19% and 1.16%. And the multi-feature integration of single image takes only 11.8ms. The algorithm has high accuracy and real-time performance, and can be combined with the required features and different prior information according to the task. It meets the requirements of saliency detection with multi-features.
