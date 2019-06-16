@@ -2,6 +2,9 @@
 Saliency Detection based on multi-feature distribution and Machine Learning theory.  
 For more information, please contact author by: williamli_pro@163.com
 
+The preprint (written in Chinese) has been submitted to:
+https://www.researchgate.net/publication/333810669_Saliency_Detection_with_Multi-features_in_Probability_Framework
+
 ## Abstract:
 In order to improve the precision of visual saliency detection with multi-features, a multi-feature integration algorithm is proposed based on the joint probability distribution of saliency map and combined with priori knowledge. Firstly, the potential defects of single feature saliency detection are analyzed, and the joint probability distribution of saliency maps with multiple features is deduced. Secondly, the priori distribution of the saliency map is deduced based on the rarity, sparsity, compactness and center priori of the saliency map, and the condition distribution of the saliency map is simplified based on the assumption of normal distribution. Then the maximum a posteriori estimation is obtained from the joint probability distribution of the saliency map, and a supervised learning model of the distribution parameters is constructed based on the multi-threshold hypothesis. Experiments show that compared to the highest-precision saliency detection method on single feature, the mean average error of the multi-feature algorithm under the supervised and heuristic method is decreased by 6.98% and 6.81%, and the average F-measure is improved by 1.19% and 1.16%. And the multi-feature integration of single image takes only 11.8ms. The algorithm has high accuracy and real-time performance, and can be combined with the required features and different prior information according to the task. It meets the requirements of saliency detection with multi-features.
 
