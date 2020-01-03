@@ -3,7 +3,7 @@ Saliency Detection based on multi-feature distribution and Machine Learning theo
 For more information, please contact author by: williamli_pro@163.com
 
 <<<<<<< HEAD
-If you use this code, please cite: 
+If you'd like to use this code, please cite: 
 YANG Xiao-gang, LI Wei-peng, MA Ma-shuang. Saliency Detection with Multi-features in Probability Framework. Acta Electronica Sinica, 2019, 47(11): 2378-2385. 
 DOI: 10.3969/j.issn.0372-2112.2019.11.020
 =======
